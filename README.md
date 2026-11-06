@@ -1,82 +1,69 @@
 # LLM-WebAutomation-Tests
 
-Validate GPT-4-Turbo, GitHub Copilot, GPT-4o with prompt techniques for optimal output
+Built and maintained by [Unnati Nettur](https://github.com/unnati-nettur)
 
-## Overview
+A chained few-shot prompting pipeline that generates complete Cypress test
+automation code — step definition files and Page Object Model classes — from BDD
+scenarios, and compares it against single-prompt baselines.
 
-This project evaluates and optimizes Large Language Models (LLMs) for generating Cypress test automation code from BDD (Behavior-Driven Development) scenarios. It leverages prompt engineering techniques including zero-shot and few-shot prompting to generate high-quality Cypress test implementations following industry best practices.
+Implementation supporting the study:
 
-## Project Structure
+> "Cypress Copilot: Development of an AI Assistant for Boosting Productivity and
+> Transforming Web Application Testing."
+> *IEEE Access*, vol. 13, pp. 3215–3229, 2024.
+> https://doi.org/10.1109/ACCESS.2024.3521407
 
-### Files
+## The approach
 
-- **Configuration** file containing:
-  - Dataset paths for Cypress BDD scenarios
-  - LLM model configurations (GPT-3.5-turbo, GPT-4o)
-  - System prompts and examples for Cypress code generation
-  - LLM parameters (temperature, top_p, max_tokens)
-  - Zero-shot and few-shot prompt templates
-  - Examples of:
-    - Feature files (BDD scenarios)
-    - Step definitions (Cypress step implementations)
-    - Page Object classes (UI element locators and methods)
+Rather than asking a model to produce an entire test suite in one call, the pipeline
+builds it in two conditioned steps:
 
-- **Google Colab Jupyter notebook** that:
-  - Loads BDD scenarios from a CSV dataset
-  - Configures OpenAI API with settings from `configure.json`
-  - Tests multiple LLM models with different prompt techniques
-  - Generates Cypress test automation code (step definitions and page objects)
-  - Evaluates and compares zero-shot vs few-shot prompting approaches
-  - Logs and stores generated code for analysis
-  - Outputs results back to CSV format
+1. **Step definitions** — the model is given an example feature file with its
+   corresponding step definition code, then generates step definitions for the
+   requested BDD scenarios.
+2. **Page Object Model classes** — the model is given an example step definition
+   paired with its POM class, plus the step definitions produced in step 1, then
+   generates the matching POM classes.
 
-## Key Features
+Each step conditions on the output of the previous one, which yields more complete
+code and fewer syntax errors than requesting everything at once.
 
-- **Multiple Prompt Techniques**: Evaluates zero-shot and few-shot prompting strategies
-- **Model Comparison**: Tests GPT-3.5-turbo and GPT-4o models
-- **Best Practices Integration**: Generates code following Cypress and Cucumber best practices
-- **BDD Framework Support**: Uses @badeball/cypress-cucumber-preprocessor library
-- **Scalable Processing**: Batch processes BDD scenarios and generates corresponding test implementations
-- **Result Tracking**: Logs all API responses and generated code for analysis
+## What it evaluates
 
-## Configuration Details
+The notebook reads BDD scenarios from a CSV, runs them through each
+model-and-prompt combination, and writes the generated code to CSV for analysis.
+Generated code is assessed on:
 
-The `configure.json` file includes:
+- **Completeness** — how many generated step and POM methods contain real
+  implementations rather than empty stubs
+- **Quality** — syntax and runtime errors encountered when the generated code is
+  executed with Cypress
 
-```json
-{
-  "cypress_input_csv_path": "path/to/cypress-dataset.csv",
-  "gpt_3.5_model": "gpt-3.5-turbo-0125",
-  "gpt_4_model": "gpt-4o-2024-08-06",
-  "gpt_temperature": 0,
-  "gpt_top_p": 1,
-  "gpt_max_tokens": 3000,
-  "system_prompt_code": "You are an expert Cypress Test Automation Engineer...",
-  "zero_shot_code": "write step definition and page object class implementation...",
-  "few_shot_assistant_feature_code": [...],
-  "few_shot_assistant_step_code": [...],
-  "few_shot_assistant_page_code": [...]
-}
-```
+Models compared: GPT-4-Turbo, GPT-4o and GitHub Copilot with zero-shot prompting,
+against GPT-4o with the chained few-shot technique.
 
-## Usage
+## Repository contents
 
-1. Set up Google Colab environment with the notebook
-2. Configure OpenAI API key using Google Colab userdata
-3. Update paths in `configure.json` to point to your dataset
-4. Run the notebook to generate Cypress test implementations from BDD scenarios
-5. Analyze the generated code and output CSV for quality and consistency
+| File | Purpose |
+| --- | --- |
+| `cypress_BDD_LLM_Prompt_optimization.ipynb` | Generation, prompt comparison and evaluation |
+| `configure.json` | Dataset paths, model settings, LLM parameters and prompt templates |
 
-## Prerequisites
+## Running it
 
-- Python 3.x
-- OpenAI API key
-- Google Colab (or local Python environment with similar setup)
-- Libraries: openai, pandas, csv
+1. Open the notebook in Google Colab or a local Jupyter environment.
+2. Set your OpenAI API key.
+3. Point `configure.json` at your BDD scenario CSV and set model parameters and
+   prompt templates.
+4. Run the notebook. Generated step definitions and POM classes are written to CSV,
+   alongside API logs for inspection.
 
-## Output
+### Prerequisites
 
-The notebook generates:
-- Cypress test implementations for each BDD scenario
-- CSV output with generated code
-- Log files with API responses for analysis
+Python 3, `openai`, `pandas`, and an OpenAI API key. To execute the generated tests
+you will also need Node.js, Cypress and `@badeball/cypress-cucumber-preprocessor`.
+
+## Note on language models
+
+Avoid entering personal or sensitive data. Generated test code should be reviewed and
+executed in a non-production environment before use.
