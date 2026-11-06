@@ -1,4 +1,4 @@
-# Cypress-Automation-LLM
+# LLM-WebAutomation-Tests
 
 Validate GPT-4-Turbo, GitHub Copilot, GPT-4o with prompt techniques for optimal output
 
